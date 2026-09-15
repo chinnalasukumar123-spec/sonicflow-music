@@ -120,9 +120,49 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const visualizerIntervalRef = useRef<any>(null);
   const fallbackAttemptRef = useRef<number>(0);
 
+  // Stable refs to prevent stale closures in event listeners
+  const repeatModeRef = useRef<RepeatMode>(repeatMode);
+  repeatModeRef.current = repeatMode;
+  const queueRef = useRef<Song[]>(queue);
+  queueRef.current = queue;
+  const queueIndexRef = useRef<number>(queueIndex);
+  queueIndexRef.current = queueIndex;
+  const isShuffledRef = useRef<boolean>(isShuffled);
+  isShuffledRef.current = isShuffled;
+  const currentSongRef = useRef<Song | null>(currentSong);
+  currentSongRef.current = currentSong;
   const isYouTubeTrack = Boolean(currentSong?.youtubeVideoId || currentSong?.source === 'youtube');
+  const isYouTubeTrackRef = useRef<boolean>(isYouTubeTrack);
+  isYouTubeTrackRef.current = isYouTubeTrack;
 
-  // 1. Initialize HTML5 Audio element
+  // Forward declaration ref for playSong to break circular dependencies
+  const playSongRef = useRef<((song: Song, newQueue?: Song[]) => void) | null>(null);
+
+  const handleNextSongStable = useCallback(() => {
+    const q = queueRef.current;
+    const qIdx = queueIndexRef.current;
+    if (q.length === 0) return;
+
+    let nextIdx = qIdx + 1;
+    if (isShuffledRef.current) {
+      nextIdx = Math.floor(Math.random() * q.length);
+    } else if (nextIdx >= q.length) {
+      if (repeatModeRef.current === 'all') {
+        nextIdx = 0;
+      } else {
+        setIsPlaying(false);
+        return;
+      }
+    }
+
+    setQueueIndex(nextIdx);
+    const nextTrack = q[nextIdx];
+    if (nextTrack && playSongRef.current) {
+      playSongRef.current(nextTrack, q);
+    }
+  }, []);
+
+  // 1. Initialize HTML5 Audio element ONCE on mount
   useEffect(() => {
     const audio = new Audio();
     audio.preload = 'auto';
@@ -131,28 +171,28 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     window.__sonicflow_audio = audio;
 
     const handleLoadedMetadata = () => {
-      if (audio.duration && !isNaN(audio.duration) && !isYouTubeTrack) {
+      if (audio.duration && !isNaN(audio.duration) && !isYouTubeTrackRef.current) {
         setDuration(audio.duration);
       }
       setIsLoading(false);
     };
 
     const handleTimeUpdate = () => {
-      if (!isYouTubeTrack) {
+      if (!isYouTubeTrackRef.current) {
         setCurrentTime(audio.currentTime);
       }
     };
 
     const handleWaiting = () => {
-      if (!isYouTubeTrack) setIsLoading(true);
+      if (!isYouTubeTrackRef.current) setIsLoading(true);
     };
 
     const handleCanPlay = () => {
-      if (!isYouTubeTrack) setIsLoading(false);
+      if (!isYouTubeTrackRef.current) setIsLoading(false);
     };
 
     const handlePlaying = () => {
-      if (!isYouTubeTrack) {
+      if (!isYouTubeTrackRef.current) {
         setIsLoading(false);
         setIsPlaying(true);
         fallbackAttemptRef.current = 0;
@@ -160,19 +200,19 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     const handleEnded = () => {
-      if (!isYouTubeTrack) {
-        if (repeatMode === 'one') {
+      if (!isYouTubeTrackRef.current) {
+        if (repeatModeRef.current === 'one') {
           audio.currentTime = 0;
           audio.play().catch(() => {});
         } else {
-          handleNextSong();
+          handleNextSongStable();
         }
       }
     };
 
     const handleError = () => {
-      if (!isYouTubeTrack) {
-        console.warn('Audio playback issue. Switching to resilient backup stream...');
+      if (!isYouTubeTrackRef.current) {
+        console.warn('Audio playback note: Checking backup stream source...');
         setIsLoading(false);
         if (fallbackAttemptRef.current < BACKUP_STREAMS.length) {
           const nextFallback = BACKUP_STREAMS[fallbackAttemptRef.current];
@@ -194,6 +234,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     return () => {
       audio.pause();
+      audio.src = '';
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('waiting', handleWaiting);
@@ -202,7 +243,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [isYouTubeTrack, repeatMode]);
+  }, [handleNextSongStable]);
 
   // 2. Initialize Official YouTube IFrame Player API
   useEffect(() => {
@@ -258,11 +299,11 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setIsLoading(true);
               } else if (event.data === 0) { // ENDED
                 setIsLoading(false);
-                if (repeatMode === 'one') {
+                if (repeatModeRef.current === 'one') {
                   event.target.seekTo(0, true);
                   event.target.playVideo();
                 } else {
-                  handleNextSong();
+                  handleNextSongStable();
                 }
               }
             },
@@ -450,6 +491,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [queue]);
 
+  playSongRef.current = playSong;
+
   // 7. Toggle Play/Pause
   const togglePlay = useCallback(() => {
     if (!currentSong) return;
@@ -475,60 +518,21 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           audioRef.current.pause();
           setIsPlaying(false);
         } else {
-          audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+          const p = audioRef.current.play();
+          if (p !== undefined) {
+            p.then(() => setIsPlaying(true)).catch(() => {});
+          }
         }
       }
     }
   }, [currentSong, isPlaying]);
 
   // 8. Next Song
-  const handleNextSong = useCallback(() => {
-    if (queue.length === 0) return;
-
-    let nextIdx = queueIndex + 1;
-    if (isShuffled) {
-      nextIdx = Math.floor(Math.random() * queue.length);
-    } else if (nextIdx >= queue.length) {
-      if (repeatMode === 'all') {
-        nextIdx = 0;
-      } else {
-        setIsPlaying(false);
-        return;
-      }
-    }
-
-    setQueueIndex(nextIdx);
-    const nextTrack = queue[nextIdx];
-    if (nextTrack) {
-      playSong(nextTrack, queue);
-    }
-  }, [queue, queueIndex, isShuffled, repeatMode, playSong]);
-
   const nextSong = useCallback(() => {
-    handleNextSong();
-  }, [handleNextSong]);
+    handleNextSongStable();
+  }, [handleNextSongStable]);
 
-  // 9. Previous Song
-  const prevSong = useCallback(() => {
-    if (currentTime > 3) {
-      seekTo(0);
-      return;
-    }
-
-    if (queue.length === 0) return;
-    let prevIdx = queueIndex - 1;
-    if (prevIdx < 0) {
-      prevIdx = repeatMode === 'all' ? queue.length - 1 : 0;
-    }
-
-    setQueueIndex(prevIdx);
-    const prevTrack = queue[prevIdx];
-    if (prevTrack) {
-      playSong(prevTrack, queue);
-    }
-  }, [currentTime, queue, queueIndex, repeatMode, playSong]);
-
-  // 10. Seek To
+  // 9. Seek To
   const seekTo = useCallback((seconds: number) => {
     setCurrentTime(seconds);
 
@@ -542,6 +546,28 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
     }
   }, [isYouTubeTrack]);
+
+  // 10. Previous Song
+  const prevSong = useCallback(() => {
+    if (currentTime > 3) {
+      seekTo(0);
+      return;
+    }
+
+    const q = queueRef.current;
+    const qIdx = queueIndexRef.current;
+    if (q.length === 0) return;
+    let prevIdx = qIdx - 1;
+    if (prevIdx < 0) {
+      prevIdx = repeatModeRef.current === 'all' ? q.length - 1 : 0;
+    }
+
+    setQueueIndex(prevIdx);
+    const prevTrack = q[prevIdx];
+    if (prevTrack) {
+      playSong(prevTrack, q);
+    }
+  }, [currentTime, playSong, seekTo]);
 
   // 11. Volume & Mute
   const setVolumeLevel = useCallback((val: number) => {

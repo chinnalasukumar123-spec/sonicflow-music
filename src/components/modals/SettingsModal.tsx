@@ -122,7 +122,7 @@ export const SettingsModal: React.FC = () => {
             </div>
             <div>
               <p className="text-xs font-bold text-foreground">Sound Equalizer & Presets</p>
-              <p className="text-[11px] text-muted-foreground">Adjust Tollywood Mass Punch, Bass Boost & Vocals</p>
+              <p className="text-[11px] text-muted-foreground">Adjust Stadium Rock Punch, Deep Bass Boost & Pop Vocals</p>
             </div>
           </div>
           <button

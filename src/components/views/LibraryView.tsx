@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Heart, User, Clock, Trash2, ListMusic } from 'lucide-react';
 import { useLibrary } from '../../context/LibraryContext';
-import { SONGS } from '../../data/songs';
 import { ARTISTS } from '../../data/artists';
 import { PlaylistCard } from '../cards/PlaylistCard';
 import { ArtistCard } from '../cards/ArtistCard';
@@ -16,14 +15,19 @@ export const LibraryView: React.FC = () => {
     recentlyPlayedSongIds,
     setIsCreatePlaylistOpen,
     navigateTo,
-    deleteCustomPlaylist
+    deleteCustomPlaylist,
+    findSongById
   } = useLibrary();
 
   const [activeTab, setActiveTab] = useState<'playlists' | 'liked' | 'artists' | 'history'>('playlists');
 
-  const likedSongs = SONGS.filter(s => likedSongIds.includes(s.id));
+  const likedSongs = likedSongIds
+    .map(id => findSongById(id))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
   const followedArtists = ARTISTS.filter(a => followedArtistIds.includes(a.id));
-  const recentSongs = recentlyPlayedSongIds.map(id => SONGS.find(s => s.id === id)).filter(Boolean) as typeof SONGS;
+  const recentSongs = recentlyPlayedSongIds
+    .map(id => findSongById(id))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   return (
     <div className="p-4 sm:p-8 space-y-8 max-w-7xl mx-auto">

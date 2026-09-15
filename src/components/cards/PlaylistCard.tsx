@@ -3,19 +3,19 @@ import { Play, Music } from 'lucide-react';
 import { Playlist } from '../../types/music';
 import { useLibrary } from '../../context/LibraryContext';
 import { usePlayer } from '../../context/PlayerContext';
-import { SONGS } from '../../data/songs';
 
 interface PlaylistCardProps {
   playlist: Playlist;
 }
 
 export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
-  const { navigateTo } = useLibrary();
+  const { navigateTo, getPlaylistSongs } = useLibrary();
   const { playSong } = usePlayer();
+
+  const playlistSongs = getPlaylistSongs(playlist.id);
 
   const handlePlayPlaylist = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const playlistSongs = SONGS.filter(s => playlist.songIds.includes(s.id));
     if (playlistSongs.length > 0) {
       playSong(playlistSongs[0], playlistSongs);
     }
@@ -60,7 +60,7 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist }) => {
         </p>
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground/80 mt-2">
           <span className="flex items-center gap-1 font-mono">
-            <Music className="w-3 h-3 text-primary" /> {playlist.songIds.length} tracks
+            <Music className="w-3 h-3 text-primary" /> {playlistSongs.length} tracks
           </span>
           {playlist.isCustom && (
             <span className="px-1.5 py-0.2 rounded text-[9px] bg-primary/20 text-primary border border-primary/30">

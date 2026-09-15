@@ -2,16 +2,17 @@ import React from 'react';
 import { Play, Shuffle, Heart, ArrowLeft, Share2 } from 'lucide-react';
 import { useLibrary } from '../../context/LibraryContext';
 import { usePlayer } from '../../context/PlayerContext';
-import { SONGS } from '../../data/songs';
 import { SongRow } from '../cards/SongRow';
 import { formatDuration } from '../../utils/formatters';
 
 export const LikedSongsView: React.FC = () => {
-  const { likedSongIds, navigateTo, openShareModal } = useLibrary();
+  const { likedSongIds, findSongById, navigateTo, openShareModal } = useLibrary();
   const { playSong } = usePlayer();
 
-  const likedSongs = SONGS.filter(s => likedSongIds.includes(s.id));
-  const totalDurationSecs = likedSongs.reduce((acc, curr) => acc + curr.duration, 0);
+  const likedSongs = likedSongIds
+    .map(id => findSongById(id))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
+  const totalDurationSecs = likedSongs.reduce((acc, curr) => acc + (curr.duration || 210), 0);
 
   const handlePlayAll = () => {
     if (likedSongs.length > 0) {

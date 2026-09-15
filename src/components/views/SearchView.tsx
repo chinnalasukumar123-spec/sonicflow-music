@@ -25,12 +25,22 @@ export const SearchView: React.FC = () => {
     searchQuery,
     setSearchQuery,
     activeGenreFilter,
-    setActiveGenreFilter
+    setActiveGenreFilter,
+    customSongs
   } = useLibrary();
+
+  // Combine static SONGS and dynamic user-added custom songs
+  const allSongs = useMemo(() => {
+    const customList = Object.values(customSongs);
+    if (customList.length === 0) return SONGS;
+    const existingIds = new Set(SONGS.map(s => s.id));
+    const uniqueCustom = customList.filter(s => !existingIds.has(s.id));
+    return [...SONGS, ...uniqueCustom];
+  }, [customSongs]);
 
   // Filter songs based on search query and active genre
   const filteredSongs = useMemo(() => {
-    let result = SONGS;
+    let result = allSongs;
 
     if (activeGenreFilter !== 'All') {
       if (activeGenreFilter === 'Trending') {
@@ -58,7 +68,7 @@ export const SearchView: React.FC = () => {
     }
 
     return result;
-  }, [searchQuery, activeGenreFilter]);
+  }, [allSongs, searchQuery, activeGenreFilter]);
 
   // Filter artists
   const filteredArtists = useMemo(() => {

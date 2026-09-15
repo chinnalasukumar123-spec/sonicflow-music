@@ -24,11 +24,11 @@ export interface Song {
   addedAt?: string;
   channelTitle?: string;
   genre?: string;
-  language?: 'English' | 'Pop' | 'Hip-Hop' | 'Rock' | 'R&B';
+  language?: string;
   explicit?: boolean;
   plays?: string;
   lyrics?: LyricsLine[];
-  tag?: 'Trending' | 'Blockbuster' | 'Classic' | 'Pop Hit' | 'Melody' | 'New Release';
+  tag?: string;
 }
 
 export interface YouTubeSearchResult {
