@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 11 15 25;
+    --foreground: 248 250 252;
+    --primary: 29 185 84;
+    --primary-rgb: 29, 185, 84;
+    --secondary: 139 92 246;
+    --accent: 236 72 153;
+    --card: 17 24 39;
+    --border: 30 41 59;
+  }
+
+  body {
+    background-color: #0b0f19;
+    color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom Glassmorphism & Cards */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(26, 34, 52, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(33, 44, 68, 0.85);
+  border-color: rgba(29, 185, 84, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px 2px rgba(29, 185, 84, 0.15);
+}
+
+/* Global Hero Glowing Banner */
+.gradient-hero {
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.18) 0%, rgba(59, 130, 246, 0.15) 50%, rgba(139, 92, 246, 0.2) 100%);
+  border: 1px solid rgba(29, 185, 84, 0.25);
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, #1DB954 0%, #10B981 100%);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+}
+
+.gradient-amber {
+  background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(29, 185, 84, 0.5);
+}
+
+/* Waveform Bars */
+.waveform-bar {
+  transform-origin: bottom;
+  animation: pulse-wave 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-wave {
+  0% { transform: scaleY(0.2); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(0.4); }
+}
+
+/* Sliders */
+input[type="range"] {
+  accent-color: #1DB954;
+}
+
+/* Range Track Styling */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1DB954;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(29, 185, 84, 0.6);
+  transition: transform 0.1s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
