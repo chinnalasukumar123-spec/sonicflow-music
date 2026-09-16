@@ -115,3 +115,41 @@ input[type="range"]::-webkit-slider-thumb {
 input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.25);
 }
+
+/* Mobile: extra bottom padding so content is not hidden behind player+nav */
+@media (max-width: 767px) {
+  .mobile-content-padding {
+    /* player (~136px) + nav (~52px) + some breathing room */
+    padding-bottom: 200px !important;
+  }
+}
+
+/* Safe area inset support for notched phones */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prevent scroll bounce on iOS / mobile */
+html, body {
+  overscroll-behavior: none;
+}
+
+/* Touch tap highlight off */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile: Modal slide-up from bottom */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.18s ease-out both;
+}

@@ -129,8 +129,8 @@ export const AddSongFromYouTubeModal: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
-      <div className="bg-[#0B1120] border border-border/80 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn">
+      <div className="bg-[#0B1120] border border-border/80 rounded-t-3xl sm:rounded-2xl w-full max-w-2xl max-h-[93vh] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="p-4 sm:p-6 pb-4 border-b border-border/60 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -287,7 +287,7 @@ export const AddSongFromYouTubeModal: React.FC = () => {
               return (
                 <div
                   key={`${item.videoId}-${idx}`}
-                  className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-muted/30 hover:bg-muted/60 border border-border/50 hover:border-border transition-all gap-3 group"
+                  className="flex items-center p-2.5 sm:p-3 rounded-xl bg-muted/30 hover:bg-muted/60 border border-border/50 hover:border-border transition-all gap-2.5 sm:gap-3 group"
                 >
                   {/* Thumbnail */}
                   <div className="relative w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-black shadow-md border border-white/10">
@@ -317,13 +317,14 @@ export const AddSongFromYouTubeModal: React.FC = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                     <a
                       href={`https://www.youtube.com/watch?v=${item.videoId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-xl text-muted-foreground hover:text-white hover:bg-muted/80 transition-colors hidden sm:flex"
-                      title="Watch on YouTube (External)"
+                      className="p-2 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors flex items-center justify-center"
+                      title="Watch on YouTube"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>

@@ -28,7 +28,7 @@ const MainContent: React.FC = () => {
   const { currentView, activeId } = useLibrary();
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto pb-32">
+    <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto pb-32 mobile-content-padding">
       <Navbar />
       <main className="flex-1">
         {currentView === 'home' && <HomeView />}
