@@ -19,8 +19,7 @@ import {
   Tv,
   ExternalLink,
   AlertTriangle,
-  X,
-  Youtube
+  X
 } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { useLibrary } from '../../context/LibraryContext';
@@ -309,7 +308,7 @@ export const PlayerBar: React.FC = () => {
               className="p-2 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-all"
               title="Watch on YouTube"
             >
-              <Youtube className="w-4 h-4" />
+              <YouTubeIcon className="w-4 h-4" />
             </a>
           )}
           <button
@@ -450,7 +449,7 @@ export const PlayerBar: React.FC = () => {
                 title="Watch on YouTube"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Youtube className="w-4 h-4" />
+                <YouTubeIcon className="w-4 h-4" />
               </a>
             )}
 
